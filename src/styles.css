@@ -178,7 +178,10 @@
 
 @utility no-native-cursor {
   @media (pointer: fine) {
-    cursor: none;
+    &,
+    & * {
+      cursor: none !important;
+    }
   }
 }
 
