@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth";
 import { Reveal } from "@/components/site/Reveal";
+import { PhotoBoard } from "@/components/site/PhotoBoard";
 
 export const Route = createFileRoute("/portal")({
   head: () => ({
@@ -38,13 +39,13 @@ function Portal() {
 
   return (
     <div className="px-6 py-16 md:px-10">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-6xl">
         <Reveal>
           <p className="eyebrow">Client portal</p>
           <h1 className="display-lg mt-3">Project Board</h1>
           <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            A shared space for clients and the studio: post an idea, respond to others, and
-            watch the thread update live.
+            Build your own board of work from your photos, and join the shared studio discussion
+            with other clients.
           </p>
         </Reveal>
 
@@ -54,7 +55,7 @@ function Portal() {
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : user ? (
-            <Board />
+            <SignedIn />
           ) : (
             <AuthPanel />
           )}
@@ -106,7 +107,7 @@ function AuthPanel() {
   }
 
   return (
-    <div className="glass mx-auto max-w-md p-8">
+    <div className="glass-strong glass-spot mx-auto max-w-md rounded-3xl p-8">
       <div className="flex gap-2">
         {(["signin", "signup"] as const).map((m) => (
           <button
@@ -161,7 +162,8 @@ function AuthPanel() {
       </form>
 
       <div className="my-6 flex items-center gap-3 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-        <span className="h-px flex-1 bg-glass-border" /> or <span className="h-px flex-1 bg-glass-border" />
+        <span className="h-px flex-1 bg-glass-border" /> or{" "}
+        <span className="h-px flex-1 bg-glass-border" />
       </div>
 
       <button
@@ -191,6 +193,59 @@ type Comment = {
 };
 
 const CATEGORIES = ["General", "Residential", "Cultural", "Hospitality", "Urban"];
+
+function SignedIn() {
+  const { user } = useAuth();
+  const [tab, setTab] = useState<"board" | "discussion">("board");
+  const name =
+    (user?.user_metadata?.["display_name"] as string | undefined) ??
+    user?.email?.split("@")[0] ??
+    "Your";
+
+  return (
+    <div>
+      <div className="glass mb-8 inline-flex rounded-full p-1">
+        {(
+          [
+            ["board", "My board"],
+            ["discussion", "Discussion"],
+          ] as const
+        ).map(([k, label]) => (
+          <button
+            key={k}
+            onClick={() => setTab(k)}
+            className={
+              "relative rounded-full px-5 py-2 text-xs uppercase tracking-[0.18em] transition-colors " +
+              (tab === k
+                ? "text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground")
+            }
+          >
+            {tab === k && (
+              <motion.span
+                layoutId="portal-tab"
+                className="absolute inset-0 rounded-full bg-primary"
+                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+              />
+            )}
+            <span className="relative">{label}</span>
+          </button>
+        ))}
+      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {tab === "board" ? <PhotoBoard owner={user!.id} name={name} /> : <Board />}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
 
 function Board() {
   const { user, signOut } = useAuth();
@@ -268,7 +323,7 @@ function Board() {
 
   return (
     <div className="space-y-12">
-      <div className="glass flex flex-wrap items-center justify-between gap-4 px-6 py-4">
+      <div className="glass flex flex-wrap items-center justify-between gap-4 rounded-2xl px-6 py-4">
         <p className="text-sm text-muted-foreground">
           Signed in as <span className="text-foreground">{user?.email}</span>
         </p>
@@ -290,7 +345,7 @@ function Board() {
           e.preventDefault();
           createPost.mutate();
         }}
-        className="glass space-y-6 p-6 md:p-8"
+        className="glass glass-spot space-y-6 rounded-2xl p-6 md:p-8"
       >
         <h2 className="font-display text-xl font-bold uppercase">Post a project idea</h2>
         <input
@@ -410,7 +465,7 @@ function PostCard({
   });
 
   return (
-    <article className="glass p-6 md:p-8">
+    <article className="glass glass-spot rounded-2xl p-6 md:p-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="rounded-full border border-glass-border px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
           {post.category}

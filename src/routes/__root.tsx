@@ -16,7 +16,10 @@ import { BriefProvider } from "@/lib/saved-concepts";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { BriefDrawer } from "@/components/site/BriefDrawer";
-import { ParticleField } from "@/components/site/ParticleField";
+import { ScrollScene } from "@/components/site/ScrollScene";
+import { Preloader } from "@/components/site/Preloader";
+import { GlassLight } from "@/components/site/GlassLight";
+import { SmoothScrollProvider } from "@/lib/smooth-scroll";
 import { CustomCursor } from "@/components/site/CustomCursor";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -119,9 +122,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          // Skip the intro overlay instantly for returning visitors (before hydration).
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(sessionStorage.getItem('aether:intro-seen')==='1')document.documentElement.classList.add('intro-seen')}catch(e){}",
+          }}
+        />
       </head>
       <body>
         {children}
@@ -138,16 +148,22 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BriefProvider>
-          <ParticleField />
-          <CustomCursor />
-          <SiteHeader />
-          <main className="relative min-h-screen pt-24">
-            {/* Required: nested routes render here. */}
-            <Outlet />
-          </main>
-          <SiteFooter />
-          <BriefDrawer />
-          <Toaster position="bottom-right" />
+          <SmoothScrollProvider>
+            <Preloader />
+            <GlassLight />
+            <ScrollScene />
+            <div aria-hidden className="grain" />
+            <div aria-hidden className="vignette" />
+            <CustomCursor />
+            <SiteHeader />
+            <main className="relative min-h-screen pt-24">
+              {/* Required: nested routes render here. */}
+              <Outlet />
+            </main>
+            <SiteFooter />
+            <BriefDrawer />
+            <Toaster position="bottom-right" />
+          </SmoothScrollProvider>
         </BriefProvider>
       </AuthProvider>
     </QueryClientProvider>
