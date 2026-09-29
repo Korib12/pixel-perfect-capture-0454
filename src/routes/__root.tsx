@@ -18,6 +18,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { BriefDrawer } from "@/components/site/BriefDrawer";
 import { ScrollScene } from "@/components/site/ScrollScene";
 import { Preloader } from "@/components/site/Preloader";
+import { GlassLight } from "@/components/site/GlassLight";
 import { SmoothScrollProvider } from "@/lib/smooth-scroll";
 import { CustomCursor } from "@/components/site/CustomCursor";
 import { Toaster } from "@/components/ui/sonner";
@@ -142,6 +143,7 @@ function RootComponent() {
         <BriefProvider>
           <SmoothScrollProvider>
             <Preloader />
+            <GlassLight />
             <ScrollScene />
             <div aria-hidden className="grain" />
             <div aria-hidden className="vignette" />

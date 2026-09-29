@@ -4,7 +4,6 @@ import { Menu, Bookmark, X } from "lucide-react";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import { useBrief } from "@/lib/saved-concepts";
 import { useAuth } from "@/lib/auth";
-import { ScrambleText } from "./ScrambleText";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -36,8 +35,8 @@ export function SiteHeader() {
       >
         <div
           className={
-            "mx-3 mt-3 flex items-center justify-between rounded-full px-4 py-2.5 transition-[background-color,border-color,backdrop-filter] duration-500 md:mx-6 md:px-6 " +
-            (scrolled ? "glass" : "border border-transparent")
+            "glass glass-spot mx-3 mt-3 flex items-center justify-between rounded-full px-4 py-2.5 transition-[background-color,box-shadow] duration-500 md:mx-6 md:px-6 " +
+            (scrolled ? "bg-background/30" : "")
           }
         >
           <Link to="/" className="font-display text-sm font-bold uppercase tracking-[0.35em]">
@@ -49,11 +48,15 @@ export function SiteHeader() {
               <Link
                 key={item.to}
                 to={item.to}
-                className="text-xs uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
-                activeProps={{ className: "text-foreground" }}
+                className="group relative text-xs uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
+                activeProps={{ className: "text-foreground nav-active" }}
                 activeOptions={{ exact: item.to === "/" }}
               >
-                <ScrambleText text={item.label} trigger="mount" hover duration={0.5} />
+                <span className="roll">
+                  <span>{item.label}</span>
+                  <span aria-hidden>{item.label}</span>
+                </span>
+                <span className="nav-dot absolute -bottom-2 left-1/2 h-1 w-1 -translate-x-1/2 scale-0 rounded-full bg-accent transition-transform duration-500 group-hover:scale-100" />
               </Link>
             ))}
           </nav>

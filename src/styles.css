@@ -148,11 +148,34 @@
   }
 }
 
+/* Frosted glass: tinted gradient fill, lit top edge, soft drop shadow. */
 @utility glass {
   background-color: var(--color-glass);
+  background-image: linear-gradient(
+    135deg,
+    oklch(1 0 0 / 9%) 0%,
+    oklch(1 0 0 / 3%) 45%,
+    oklch(1 0 0 / 1.5%) 100%
+  );
   border: 1px solid var(--color-glass-border);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 14%),
+    inset 0 -1px 0 oklch(1 0 0 / 3%),
+    0 24px 60px -24px oklch(0 0 0 / 65%);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+}
+
+/* Heavier glass for panels that sit over photos. */
+@utility glass-strong {
+  background-color: oklch(0.16 0.003 286 / 38%);
+  background-image: linear-gradient(135deg, oklch(1 0 0 / 12%) 0%, oklch(1 0 0 / 2%) 60%);
+  border: 1px solid oklch(1 0 0 / 16%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 20%),
+    0 30px 80px -30px oklch(0 0 0 / 75%);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
 }
 
 @utility display-xl {
@@ -296,8 +319,136 @@
   }
 }
 
+@layer components {
+  /* Light that follows the pointer across a glass panel (vars set in GlassLight). */
+  .glass-spot {
+    position: relative;
+    isolation: isolate;
+  }
+  .glass-spot::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: var(--spot-o, 0);
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      oklch(1 0 0 / 9%),
+      transparent 60%
+    );
+    z-index: 1;
+  }
+  /* rim light on the border under the pointer */
+  .glass-spot::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    opacity: var(--spot-o, 0);
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      260px circle at var(--mx, 50%) var(--my, 50%),
+      oklch(0.85 0.1 72 / 70%),
+      transparent 70%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 2;
+  }
+}
+
+/* Slow-drifting colour fields behind everything, so the glass has light to bend. */
+.ambient {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -20;
+  overflow: hidden;
+}
+.ambient span {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.5;
+  animation: drift 26s ease-in-out infinite alternate;
+}
+.ambient span:nth-child(1) {
+  width: 46vw;
+  height: 46vw;
+  left: -10vw;
+  top: -12vw;
+  background: oklch(0.55 0.09 72 / 55%);
+}
+.ambient span:nth-child(2) {
+  width: 40vw;
+  height: 40vw;
+  right: -12vw;
+  top: 30vh;
+  background: oklch(0.45 0.06 240 / 55%);
+  animation-duration: 32s;
+  animation-delay: -8s;
+}
+.ambient span:nth-child(3) {
+  width: 34vw;
+  height: 34vw;
+  left: 25vw;
+  bottom: -18vw;
+  background: oklch(0.5 0.05 30 / 40%);
+  animation-duration: 38s;
+  animation-delay: -16s;
+}
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(8vw, 6vh, 0) scale(1.15);
+  }
+  100% {
+    transform: translate3d(-6vw, -4vh, 0) scale(0.92);
+  }
+}
+
+/* Nav hover: label rolls up and a copy rolls in from below. */
+.roll {
+  display: inline-flex;
+  overflow: hidden;
+  position: relative;
+  line-height: 1.25;
+  vertical-align: bottom;
+}
+.roll > span {
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.roll > span + span {
+  position: absolute;
+  inset: 0;
+  transform: translateY(105%);
+}
+.group:hover .roll > span:first-child,
+.roll:hover > span:first-child {
+  transform: translateY(-105%);
+}
+.group:hover .roll > span + span,
+.roll:hover > span + span {
+  transform: translateY(0);
+}
+
+.nav-active .nav-dot {
+  transform: translateX(-50%) scale(1);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .grain,
+  .ambient span,
+  .grain::before,
   .scroll-cue,
   .scanline {
     animation: none;

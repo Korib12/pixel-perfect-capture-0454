@@ -89,7 +89,7 @@ export function ScrollHud() {
       </nav>
 
       {/* readout */}
-      <div className="pointer-events-none fixed bottom-5 left-6 z-40 hidden items-center gap-4 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground md:flex">
+      <div className="glass pointer-events-none fixed bottom-5 left-6 z-40 hidden items-center gap-4 rounded-full px-4 py-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground md:flex">
         <span className="tabular-nums text-foreground">{String(pct).padStart(3, "0")}%</span>
         <span className="h-px w-8 bg-glass-border" />
         <span className="tabular-nums">

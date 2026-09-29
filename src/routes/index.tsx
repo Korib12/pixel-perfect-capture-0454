@@ -18,6 +18,8 @@ import { Magnetic } from "@/components/site/Magnetic";
 import { VelocityMarquee } from "@/components/site/VelocityMarquee";
 import { ScrollHud } from "@/components/site/ScrollHud";
 import { useIntroDone } from "@/components/site/Preloader";
+import { Gallery, Horizon } from "@/components/site/HomeImagery";
+import { CTA_BACKDROP } from "@/lib/imagery";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -74,10 +76,12 @@ function Home() {
           "Built to age",
         ]}
       />
+      <Horizon />
       <Showcase />
       <Manifesto />
       <Process />
       <BlueprintViewer />
+      <Gallery />
       <CTA />
     </div>
   );
@@ -219,7 +223,7 @@ function Hero() {
               initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
               animate={ready ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
               transition={{ delay: 0.55, duration: 1.1, ease: EASE }}
-              className="text-base leading-relaxed text-muted-foreground md:col-span-5 md:col-start-8"
+              className="glass glass-spot rounded-2xl p-6 text-base leading-relaxed text-foreground/75 md:col-span-5 md:col-start-8"
             >
               We build few things, slowly. Each project is a negotiation between a site, a material
               and a century — resolved at full scale before anything is poured.
@@ -267,7 +271,7 @@ function WorkCard({ c, i }: { c: Concept; i: number }) {
       <motion.div style={{ y: cardY }}>
         <Link to="/portfolio" className="block" data-cursor="View">
           <motion.div
-            className="relative aspect-4/5 overflow-hidden"
+            className="relative aspect-4/5 overflow-hidden rounded-2xl"
             initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
             whileInView={{ clipPath: "inset(0% 0% 0% 0%)" }}
             viewport={{ once: true, margin: "-10% 0px" }}
@@ -296,21 +300,23 @@ function WorkCard({ c, i }: { c: Concept; i: number }) {
               />
             </motion.div>
             <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent opacity-80 transition-opacity duration-700 group-hover:opacity-40" />
-            <span className="absolute left-4 top-4 font-mono text-[10px] uppercase tracking-[0.28em] text-foreground/80">
+            <span className="glass-strong absolute left-3 top-3 rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-foreground/80">
               {String(i + 1).padStart(2, "0")} — {c.category}
             </span>
-            <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 -translate-x-2 translate-y-2 opacity-0 transition-all duration-500 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" />
+            <span className="glass-strong absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full opacity-0 transition-all duration-500 group-hover:opacity-100">
+              <ArrowUpRight className="h-4 w-4 -translate-x-1 translate-y-1 transition-transform duration-500 group-hover:translate-x-0 group-hover:translate-y-0" />
+            </span>
+            <div className="glass-strong absolute inset-x-3 bottom-3 rounded-xl px-4 py-3.5 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1">
+              <div className="flex items-baseline justify-between gap-4">
+                <h3 className="font-display text-lg font-bold uppercase">{c.title}</h3>
+                <span className="font-mono text-xs text-muted-foreground">{c.year}</span>
+              </div>
+              <div className="relative mt-1.5 h-px w-full overflow-hidden bg-glass-border">
+                <span className="absolute inset-0 origin-left scale-x-0 bg-accent transition-transform duration-700 ease-out group-hover:scale-x-100" />
+              </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">{c.location}</p>
+            </div>
           </motion.div>
-          <div className="mt-4 flex items-baseline justify-between gap-4">
-            <h3 className="font-display text-lg font-bold uppercase">
-              <ScrambleText text={c.title} hover duration={0.5} />
-            </h3>
-            <span className="font-mono text-xs text-muted-foreground">{c.year}</span>
-          </div>
-          <div className="relative mt-1 h-px w-full overflow-hidden bg-glass-border">
-            <span className="absolute inset-0 origin-left scale-x-0 bg-accent transition-transform duration-700 ease-out group-hover:scale-x-100" />
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">{c.location}</p>
         </Link>
       </motion.div>
     </motion.article>
@@ -336,7 +342,7 @@ function Showcase() {
               <ScrambleText text="Selected Work" duration={1.1} />
             </h2>
           </div>
-          <Reveal className="flex flex-wrap gap-2" delay={0.2}>
+          <Reveal className="glass flex flex-wrap gap-1 rounded-full p-1" delay={0.2}>
             {CATEGORIES.map((c) => (
               <button
                 key={c}
@@ -345,7 +351,7 @@ function Showcase() {
                   "relative rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.16em] transition-colors " +
                   (filter === c
                     ? "border-transparent text-primary-foreground"
-                    : "border-glass-border text-muted-foreground hover:text-foreground")
+                    : "border-transparent text-muted-foreground hover:text-foreground")
                 }
               >
                 {filter === c && (
@@ -454,7 +460,7 @@ function Manifesto() {
             { v: 3, s: "", l: "Commissions a year" },
             { v: 100, s: "+", l: "Year design life" },
           ].map((s, i) => (
-            <Reveal key={s.l} delay={i * 0.08} className="hairline pt-5">
+            <Reveal key={s.l} delay={i * 0.08} className="glass glass-spot rounded-2xl p-6">
               <div className="font-display text-5xl font-bold md:text-6xl">
                 <Counter to={s.v} suffix={s.s} />
               </div>
@@ -487,7 +493,7 @@ function ProcessCard({
   return (
     <motion.div
       style={{ scale, opacity, rotateY }}
-      className="glass relative flex h-72 w-[78vw] flex-none flex-col justify-between overflow-hidden p-7 sm:w-[46vw] lg:w-[30vw]"
+      className="glass glass-spot relative flex h-72 w-[78vw] rounded-2xl flex-none flex-col justify-between overflow-hidden p-7 sm:w-[46vw] lg:w-[30vw]"
     >
       <span className="pointer-events-none absolute -right-4 -top-8 font-display text-[9rem] font-bold leading-none text-foreground/[0.04]">
         {s.n}
@@ -605,7 +611,7 @@ function BlueprintViewer() {
           <div
             data-lenis-prevent
             data-cursor="Drag"
-            className="glass relative flex h-[420px] cursor-grab items-center justify-center overflow-hidden select-none active:cursor-grabbing md:h-[520px]"
+            className="glass glass-spot relative flex h-[420px] cursor-grab rounded-2xl items-center justify-center overflow-hidden select-none active:cursor-grabbing md:h-[520px]"
             style={{ perspective: "1200px" }}
             onPointerDown={(e) => {
               dragging.current = true;
@@ -694,23 +700,39 @@ function BlueprintSvg() {
 function CTA() {
   const ref = useRef<HTMLElement | null>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end end"] });
-  const fill = useTransform(scrollYProgress, [0.15, 0.85], [100, 0]);
+  const fill = useTransform(scrollYProgress, [0.25, 0.9], [100, 0]);
   const clip = useTransform(fill, (f) => `inset(0 ${f}% 0 0)`);
-  const scale = useTransform(scrollYProgress, [0, 1], [0.86, 1]);
+  const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
+  const bgY = useTransform(scrollYProgress, [0, 1], ["-18%", "0%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1.25, 1.05]);
 
   return (
     <section
       ref={ref}
       data-section="Commission"
       data-scene="4"
-      className="hairline overflow-hidden px-6 py-32 md:px-10 md:py-44"
+      className="relative isolate overflow-hidden px-4 py-28 md:px-10 md:py-40"
     >
-      <motion.div style={{ scale }} className="mx-auto max-w-7xl text-center">
+      <motion.div aria-hidden className="absolute inset-0 -z-10" style={{ y: bgY, scale: bgScale }}>
+        <img src={CTA_BACKDROP} alt="" className="h-full w-full object-cover" />
+      </motion.div>
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-background/55 to-background"
+      />
+
+      <motion.div
+        style={{ scale }}
+        className="glass-strong glass-spot mx-auto max-w-6xl rounded-[2rem] px-6 py-16 text-center md:px-16 md:py-24"
+      >
         <p className="eyebrow">
           <ScrambleText text="Three commissions a year" />
         </p>
-        <h2 className="relative mt-6 font-display text-[clamp(2.75rem,10vw,9.5rem)] font-bold uppercase leading-[0.88] tracking-[-0.045em]">
-          <span className="text-outline block" aria-hidden>
+        <h2 className="relative mt-6 font-display text-[clamp(2.5rem,9vw,8.5rem)] font-bold uppercase leading-[0.88] tracking-[-0.045em]">
+          <span
+            className="block text-transparent [-webkit-text-stroke:1px_oklch(1_0_0/35%)]"
+            aria-hidden
+          >
             Begin a<br />
             commission
           </span>
@@ -719,14 +741,14 @@ function CTA() {
             commission
           </motion.span>
         </h2>
-        <p className="mx-auto mt-8 max-w-xl text-sm text-muted-foreground">
+        <p className="mx-auto mt-8 max-w-xl text-sm text-foreground/75">
           We accept three new projects each year. Tell us about the site.
         </p>
         <Magnetic strength={0.5} className="mt-12">
           <Link
             to="/contact"
             data-cursor="Write"
-            className="group relative inline-flex h-36 w-36 items-center justify-center overflow-hidden rounded-full bg-accent text-[11px] uppercase tracking-[0.2em] text-accent-foreground md:h-44 md:w-44"
+            className="group relative inline-flex h-36 w-36 items-center justify-center overflow-hidden rounded-full bg-accent text-[11px] uppercase tracking-[0.2em] text-accent-foreground shadow-[0_20px_60px_-15px_oklch(0.78_0.09_72/60%)] md:h-40 md:w-40"
           >
             <span className="absolute inset-0 translate-y-full rounded-full bg-primary transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0" />
             <span className="relative flex items-center gap-2">
