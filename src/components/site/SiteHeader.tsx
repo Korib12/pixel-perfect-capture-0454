@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, Bookmark, X } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import { useBrief } from "@/lib/saved-concepts";
 import { useAuth } from "@/lib/auth";
+import { ScrambleText } from "./ScrambleText";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -16,16 +17,29 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { slugs, setDrawerOpen } = useBrief();
   const { user } = useAuth();
+  const { scrollY } = useScroll();
+  const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const prev = scrollY.getPrevious() ?? 0;
+    setHidden(y > prev && y > 240);
+    setScrolled(y > 40);
+  });
 
   return (
     <>
       <motion.header
         initial={{ y: -40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        animate={{ y: hidden ? "-130%" : 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="fixed inset-x-0 top-0 z-50"
       >
-        <div className="glass mx-3 mt-3 flex items-center justify-between rounded-full px-4 py-2.5 md:mx-6 md:px-6">
+        <div
+          className={
+            "mx-3 mt-3 flex items-center justify-between rounded-full px-4 py-2.5 transition-[background-color,border-color,backdrop-filter] duration-500 md:mx-6 md:px-6 " +
+            (scrolled ? "glass" : "border border-transparent")
+          }
+        >
           <Link to="/" className="font-display text-sm font-bold uppercase tracking-[0.35em]">
             Aether
           </Link>
@@ -39,7 +53,7 @@ export function SiteHeader() {
                 activeProps={{ className: "text-foreground" }}
                 activeOptions={{ exact: item.to === "/" }}
               >
-                {item.label}
+                <ScrambleText text={item.label} trigger="mount" hover duration={0.5} />
               </Link>
             ))}
           </nav>

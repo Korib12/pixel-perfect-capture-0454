@@ -16,7 +16,9 @@ import { BriefProvider } from "@/lib/saved-concepts";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { BriefDrawer } from "@/components/site/BriefDrawer";
-import { ParticleField } from "@/components/site/ParticleField";
+import { ScrollScene } from "@/components/site/ScrollScene";
+import { Preloader } from "@/components/site/Preloader";
+import { SmoothScrollProvider } from "@/lib/smooth-scroll";
 import { CustomCursor } from "@/components/site/CustomCursor";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -138,16 +140,21 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BriefProvider>
-          <ParticleField />
-          <CustomCursor />
-          <SiteHeader />
-          <main className="relative min-h-screen pt-24">
-            {/* Required: nested routes render here. */}
-            <Outlet />
-          </main>
-          <SiteFooter />
-          <BriefDrawer />
-          <Toaster position="bottom-right" />
+          <SmoothScrollProvider>
+            <Preloader />
+            <ScrollScene />
+            <div aria-hidden className="grain" />
+            <div aria-hidden className="vignette" />
+            <CustomCursor />
+            <SiteHeader />
+            <main className="relative min-h-screen pt-24">
+              {/* Required: nested routes render here. */}
+              <Outlet />
+            </main>
+            <SiteFooter />
+            <BriefDrawer />
+            <Toaster position="bottom-right" />
+          </SmoothScrollProvider>
         </BriefProvider>
       </AuthProvider>
     </QueryClientProvider>
