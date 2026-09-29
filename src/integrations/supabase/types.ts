@@ -14,7 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inquiries: {
+        Row: {
+          concepts: string[]
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          project_type: string
+        }
+        Insert: {
+          concepts?: string[]
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          project_type?: string
+        }
+        Update: {
+          concepts?: string[]
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          project_type?: string
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          id?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      saved_concepts: {
+        Row: {
+          concept_slug: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          concept_slug: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          concept_slug?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
