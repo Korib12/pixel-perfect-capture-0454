@@ -308,6 +308,10 @@
   }
 }
 
+.intro-seen .preloader-failsafe {
+  display: none;
+}
+
 /* if JS never runs, the intro still gets out of the way */
 .preloader-failsafe {
   animation: preloader-failsafe 0s linear 7s forwards;

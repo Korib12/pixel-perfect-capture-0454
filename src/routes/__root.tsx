@@ -122,9 +122,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          // Skip the intro overlay instantly for returning visitors (before hydration).
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(sessionStorage.getItem('aether:intro-seen')==='1')document.documentElement.classList.add('intro-seen')}catch(e){}",
+          }}
+        />
       </head>
       <body>
         {children}

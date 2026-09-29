@@ -89,8 +89,8 @@ export const CONCEPTS: Concept[] = [
     location: "Ávila, Spain",
     year: "2023",
     category: "Cultural",
-    blurb: "Rammed earth walls, one oculus, and nothing else.",
-    image: u("photo-1520637736862-4d197d17c55a"),
+    blurb: "Curved timber walls, one oculus, and nothing else.",
+    image: "/photos/quiet-chapel.jpg",
   },
 ];
 
