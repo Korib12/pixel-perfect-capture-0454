@@ -1,20 +1,34 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ImagePlus, Loader2, MapPin, Plus, Trash2, Upload, X } from "lucide-react";
+import {
+  Cloud,
+  HardDrive,
+  ImagePlus,
+  Loader2,
+  MapPin,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
+  addProject,
   compressImage,
-  deleteProject,
-  listProjects,
-  saveProject,
-  type BoardProject,
+  loadBoard,
+  removeProject,
+  type BoardMode,
+  type ShownProject,
 } from "@/lib/board-store";
 import { Lightbox } from "./Lightbox";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 type Pending = { id: string; blob: Blob; url: string };
-type Shown = BoardProject & { urls: string[] };
+type Shown = ShownProject;
+
+const revoke = (urls: string[]) =>
+  urls.forEach((u) => u.startsWith("blob:") && URL.revokeObjectURL(u));
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
@@ -23,16 +37,23 @@ export function PhotoBoard({ owner, name }: { owner: string; name: string }) {
   const [loading, setLoading] = useState(true);
   const [composer, setComposer] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
+  const [mode, setMode] = useState<BoardMode>("cloud");
 
   const load = useCallback(async () => {
     try {
-      const list = await listProjects(owner);
+      const res = await loadBoard(owner);
+      setMode(res.mode);
       setProjects((prev) => {
-        prev.forEach((p) => p.urls.forEach((u) => URL.revokeObjectURL(u)));
-        return list.map((p) => ({ ...p, urls: p.photos.map((b) => URL.createObjectURL(b)) }));
+        prev.forEach((p) => revoke(p.urls));
+        return res.projects;
       });
+      if (res.moved) {
+        toast.success(
+          `Moved ${res.moved} project${res.moved === 1 ? "" : "s"} from this device into your account.`,
+        );
+      }
     } catch {
-      toast.error("Your browser blocked local storage, so the board can't be saved.");
+      toast.error("Couldn't load your board. Check your connection and refresh.");
     } finally {
       setLoading(false);
     }
@@ -44,12 +65,9 @@ export function PhotoBoard({ owner, name }: { owner: string; name: string }) {
 
   const live = useRef<Shown[]>([]);
   live.current = projects;
-  useEffect(
-    () => () => live.current.forEach((p) => p.urls.forEach((u) => URL.revokeObjectURL(u))),
-    [],
-  );
+  useEffect(() => () => live.current.forEach((p) => revoke(p.urls)), []);
 
-  const photoCount = projects.reduce((n, p) => n + p.photos.length, 0);
+  const photoCount = projects.reduce((n, p) => n + p.urls.length, 0);
 
   // Lightbox walks every photo across every project.
   const flat = useMemo(
@@ -58,9 +76,13 @@ export function PhotoBoard({ owner, name }: { owner: string; name: string }) {
   );
   const openProject = (id: string) => setOpen(flat.findIndex((f) => f.p.id === id));
 
-  const remove = async (id: string) => {
-    await deleteProject(id);
-    toast.message("Project removed from your board.");
+  const remove = async (p: Shown) => {
+    try {
+      await removeProject(mode, p);
+      toast.message("Project removed from your board.");
+    } catch {
+      toast.error("Couldn't delete that project. Please try again.");
+    }
     void load();
   };
 
@@ -97,9 +119,21 @@ export function PhotoBoard({ owner, name }: { owner: string; name: string }) {
         </div>
       </div>
 
-      <p className="mt-3 px-2 text-xs text-muted-foreground">
-        Photos stay private in this browser on this device.
-      </p>
+      {!loading && (
+        <p className="mt-3 flex items-center gap-2 px-2 text-xs text-muted-foreground">
+          {mode === "cloud" ? (
+            <>
+              <Cloud className="h-3.5 w-3.5 text-accent" /> Saved to your account — private to you,
+              on any device.
+            </>
+          ) : (
+            <>
+              <HardDrive className="h-3.5 w-3.5" /> Saved on this device for now. It'll move into
+              your account automatically once account saving is switched on.
+            </>
+          )}
+        </p>
+      )}
 
       {/* board */}
       <div className="mt-8">
@@ -118,7 +152,7 @@ export function PhotoBoard({ owner, name }: { owner: string; name: string }) {
                   p={p}
                   i={i}
                   onOpen={() => openProject(p.id)}
-                  onDelete={() => void remove(p.id)}
+                  onDelete={() => void remove(p)}
                 />
               ))}
             </AnimatePresence>
@@ -130,6 +164,7 @@ export function PhotoBoard({ owner, name }: { owner: string; name: string }) {
         {composer && (
           <Composer
             owner={owner}
+            mode={mode}
             onClose={() => setComposer(false)}
             onSaved={() => {
               setComposer(false);
@@ -291,10 +326,12 @@ function ProjectTile({
 
 function Composer({
   owner,
+  mode,
   onClose,
   onSaved,
 }: {
   owner: string;
+  mode: BoardMode;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -348,19 +385,20 @@ function Composer({
     }
     setBusy(true);
     try {
-      await saveProject({
-        id: uid(),
-        owner,
+      await addProject(owner, mode, {
         title: title.trim() || "Untitled project",
         location: location.trim(),
         description: description.trim(),
         photos: pending.map((p) => p.blob),
-        createdAt: Date.now(),
       });
       toast.success("Added to your board.");
       onSaved();
     } catch {
-      toast.error("Couldn't save — your browser may be out of space.");
+      toast.error(
+        mode === "cloud"
+          ? "Upload failed. Check your connection and try again."
+          : "Couldn't save — your browser may be out of space.",
+      );
       setBusy(false);
     }
   };

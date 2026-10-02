@@ -9,6 +9,7 @@ import { Magnetic } from "@/components/site/Magnetic";
 import { supabase } from "@/integrations/supabase/client";
 import { useBrief } from "@/lib/saved-concepts";
 import { conceptBySlug } from "@/lib/concepts";
+import { sendContactEmail } from "@/lib/contact-email";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -171,20 +172,29 @@ function Contact() {
   const imgY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const titleX = useTransform(scrollYProgress, [0, 1], ["0%", "-12%"]);
 
-  async function onSubmit(e: React.FormEvent) {
+  const savedTitles = slugs.map((s) => conceptBySlug(s)?.title).filter(Boolean) as string[];
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // honeypot: real people never fill the hidden field
+    if (new FormData(e.currentTarget).get("company_website")) return;
     setSending(true);
-    const { error } = await supabase.from("inquiries").insert({ ...form, concepts: slugs });
+
+    // Email goes to your inbox; the database copy is a backup record.
+    const [mail, db] = await Promise.allSettled([
+      sendContactEmail({ ...form, saved_projects: savedTitles.join(", ") }),
+      supabase.from("inquiries").insert({ ...form, concepts: slugs }),
+    ]);
     setSending(false);
-    if (error) {
-      toast.error("Your message didn't send. Please try again.");
+
+    const dbOk = db.status === "fulfilled" && !db.value.error;
+    if (mail.status === "rejected" && !dbOk) {
+      toast.error("Your message didn't send. Please check your connection and try again.");
       return;
     }
     setSent(true);
     setForm({ name: "", email: "", project_type: PROJECT_TYPES[0]!, message: "" });
   }
-
-  const savedTitles = slugs.map((s) => conceptBySlug(s)?.title).filter(Boolean) as string[];
 
   return (
     <div className="-mt-24">
@@ -302,6 +312,14 @@ function Contact() {
                       </span>
                     </div>
 
+                    <input
+                      type="text"
+                      name="company_website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden
+                      className="absolute -left-[9999px] h-0 w-0 opacity-0"
+                    />
                     <div className="grid gap-8 md:grid-cols-2">
                       <Field id="name" label="Your name" filled={!!form.name}>
                         <input

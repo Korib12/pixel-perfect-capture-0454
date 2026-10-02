@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      board_projects: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          location: string
+          photo_paths: string[]
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string
+          photo_paths?: string[]
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string
+          photo_paths?: string[]
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           body: string
